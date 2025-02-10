@@ -2,13 +2,12 @@ import math
 from unittest.mock import Mock, call
 
 from kirin import ir
-from bloqade import qasm2
-from bloqade.runtime import qrack
+from bloqade import qasm2, pyqrack
 
 
 def run_mock(size: int, program: ir.Method) -> Mock:
-    memory = qrack.Memory(size, 0, Mock())
-    interp = qrack.PyQrackInterpreter(qasm2.main, memory=memory)
+    memory = pyqrack.Memory(size, 0, Mock())
+    interp = pyqrack.PyQrackInterpreter(qasm2.main, memory=memory)
     interp.run(program, ())
 
     return memory.sim_reg

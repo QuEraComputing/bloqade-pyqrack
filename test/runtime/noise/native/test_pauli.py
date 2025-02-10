@@ -3,7 +3,7 @@ from unittest.mock import Mock, call
 from kirin import ir
 from bloqade import qasm2
 from bloqade.noise import native
-from bloqade.runtime.qrack import Memory, PyQrackInterpreter
+from bloqade.pyqrack import Memory, PyQrackInterpreter
 
 simulation = qasm2.main.add(native)
 

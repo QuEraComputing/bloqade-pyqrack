@@ -1,6 +1,6 @@
 from kirin import interp
 from bloqade.noise import native
-from bloqade.runtime.qrack import PyQrackInterpreter, reg
+from bloqade.pyqrack import PyQrackInterpreter, reg
 
 
 @native.dialect.register(key="pyqrack")

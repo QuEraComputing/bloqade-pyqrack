@@ -2,9 +2,9 @@ from typing import TYPE_CHECKING, Any
 
 from kirin import interp
 from kirin.dialects import ilist
+from bloqade.pyqrack.reg import SimQubitRef
+from bloqade.pyqrack.base import PyQrackInterpreter
 from bloqade.qasm2.dialects import parallel
-from bloqade.runtime.qrack.reg import SimQubitRef
-from bloqade.runtime.qrack.base import PyQrackInterpreter
 
 if TYPE_CHECKING:
     from pyqrack import QrackSimulator

@@ -4,8 +4,8 @@ from dataclasses import dataclass
 from kirin import ir
 from pyqrack import QrackSimulator
 from kirin.passes import Fold
+from bloqade.pyqrack.base import Memory, PyQrackInterpreter
 from bloqade.analysis.address import AnyAddress, AddressAnalysis
-from bloqade.runtime.qrack.base import Memory, PyQrackInterpreter
 
 Params = ParamSpec("Params")
 RetType = TypeVar("RetType")

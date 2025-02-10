@@ -1,15 +1,15 @@
 from typing import TYPE_CHECKING
 
 from kirin import interp
-from bloqade.qasm2.dialects import core
-from bloqade.runtime.qrack.reg import (
+from bloqade.pyqrack.reg import (
     CBitRef,
     CRegister,
     QubitState,
     SimQubitRef,
     SimQRegister,
 )
-from bloqade.runtime.qrack.base import PyQrackInterpreter
+from bloqade.pyqrack.base import PyQrackInterpreter
+from bloqade.qasm2.dialects import core
 
 if TYPE_CHECKING:
     from pyqrack import QrackSimulator

@@ -2,8 +2,8 @@ import math
 from typing import TYPE_CHECKING
 
 from kirin import interp
+from bloqade.pyqrack.reg import SimQubitRef
 from bloqade.qasm2.dialects import uop
-from bloqade.runtime.qrack.reg import SimQubitRef
 
 if TYPE_CHECKING:
     from pyqrack import QrackSimulator
