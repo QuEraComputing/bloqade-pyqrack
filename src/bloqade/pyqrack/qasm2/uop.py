@@ -24,7 +24,9 @@ class PyQrackMethods(interp.MethodTable):
         "cy": "mcy",
         "ch": "mch",
         "sdag": "adjs",
+        "sdg": "adjs", 
         "tdag": "adjt",
+        "tdg": "adjt",
     }
 
     AXIS_MAP = {"rx": 1, "ry": 2, "rz": 3}
