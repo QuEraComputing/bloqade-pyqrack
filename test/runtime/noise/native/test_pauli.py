@@ -52,8 +52,7 @@ def test_cz_pauli_channel_false():
     rng_state.choice.side_effect = ["y"]
     rng_state.uniform.return_value = 0.5
     sim_reg = run_mock(2, test_atom_loss, rng_state)
-
-    sim_reg.assert_has_calls([call.mcz([0], 1), call.y(1)])
+    sim_reg.assert_has_calls([call.mcz([0], 1), call.force_m(0, 1), call.y(1)])
 
 
 def test_cz_pauli_channel_true():
