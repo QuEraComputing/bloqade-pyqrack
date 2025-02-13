@@ -2,6 +2,8 @@ import enum
 from typing import List, Generic, TypeVar
 from dataclasses import dataclass
 
+from bloqade.qasm2.types import QReg
+
 
 class QubitState(enum.Enum):
     Active = enum.auto()
@@ -9,7 +11,7 @@ class QubitState(enum.Enum):
 
 
 @dataclass(frozen=True)
-class QRegister:
+class QRegister(QReg):
     size: int
 
     def __hash__(self):
