@@ -2,32 +2,7 @@ import enum
 from typing import List, Generic, TypeVar
 from dataclasses import dataclass
 
-from bloqade.qasm2.types import QReg
-
-
-class QubitState(enum.Enum):
-    Active = enum.auto()
-    Lost = enum.auto()
-
-
-@dataclass(frozen=True)
-class QRegister(QReg):
-    size: int
-
-    def __hash__(self):
-        return id(self)
-
-    def __eq__(self, other):
-        return self is other
-
-    def __getitem__(self, pos: int):
-        return QubitRef(self, pos)
-
-
-@dataclass(frozen=True)
-class QubitRef:
-    ref: QRegister
-    pos: int
+from bloqade.qasm2.types import QReg, Qubit
 
 
 class CRegister(list[bool]):
@@ -47,11 +22,17 @@ class CBitRef:
         return self.ref[self.pos]
 
 
+class QubitState(enum.Enum):
+    Active = enum.auto()
+    Lost = enum.auto()
+
+
 SimRegType = TypeVar("SimRegType")
 
 
 @dataclass(frozen=True)
-class SimQRegister(QRegister, Generic[SimRegType]):
+class SimQRegister(QReg, Generic[SimRegType]):
+    size: int
     sim_reg: SimRegType
     addrs: tuple[int, ...]
     qubit_state: List[QubitState]
@@ -65,7 +46,7 @@ class SimQRegister(QRegister, Generic[SimRegType]):
 
 
 @dataclass(frozen=True)
-class SimQubitRef(QubitRef, Generic[SimRegType]):
+class SimQubitRef(Qubit, Generic[SimRegType]):
     ref: SimQRegister[SimRegType]
     pos: int
 
