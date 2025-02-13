@@ -22,7 +22,7 @@ def test_atom_loss():
 
     memory = Memory(total=2, allocated=0, sim_reg=Mock())
 
-    result: reg.SimQRegister[Mock] = (
+    result: reg.SimQReg[Mock] = (
         PyQrackInterpreter(simulation, memory=memory, rng_state=rng_state)
         .run(test_atom_loss, ())
         .expect()

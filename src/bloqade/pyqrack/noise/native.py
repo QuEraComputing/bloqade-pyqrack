@@ -13,7 +13,7 @@ class PyQrackMethods(interp.MethodTable):
     def apply_pauli_error(
         self,
         interp: PyQrackInterpreter,
-        qarg: reg.SimQubitRef,
+        qarg: reg.SimQubit,
         px: float,
         py: float,
         pz: float,
@@ -39,7 +39,7 @@ class PyQrackMethods(interp.MethodTable):
         px: float = frame.get(stmt.px)
         py: float = frame.get(stmt.py)
         pz: float = frame.get(stmt.pz)
-        qarg: reg.SimQubitRef = frame.get(stmt.qarg)
+        qarg: reg.SimQubit = frame.get(stmt.qarg)
 
         if qarg.is_active():
             self.apply_pauli_error(interp, qarg, px, py, pz)
@@ -56,12 +56,12 @@ class PyQrackMethods(interp.MethodTable):
         px_1: float = frame.get(stmt.px_1)
         py_1: float = frame.get(stmt.py_1)
         pz_1: float = frame.get(stmt.pz_1)
-        qarg1: reg.SimQubitRef = frame.get(stmt.qarg1)
+        qarg1: reg.SimQubit = frame.get(stmt.qarg1)
 
         px_2: float = frame.get(stmt.px_2)
         py_2: float = frame.get(stmt.py_2)
         pz_2: float = frame.get(stmt.pz_2)
-        qarg2: reg.SimQubitRef = frame.get(stmt.qarg2)
+        qarg2: reg.SimQubit = frame.get(stmt.qarg2)
 
         is_active_1 = qarg1.is_active()
         is_active_2 = qarg2.is_active()
@@ -88,9 +88,7 @@ class PyQrackMethods(interp.MethodTable):
         stmt: native.AtomLossChannel,
     ):
         prob: float = frame.get(stmt.prob)
-        qarg: reg.SimQubitRef["QrackSimulator"] = frame.get_typed(
-            stmt.qarg, reg.SimQubitRef
-        )
+        qarg: reg.SimQubit["QrackSimulator"] = frame.get_typed(stmt.qarg, reg.SimQubit)
 
         if qarg.is_active() and interp.rng_state.uniform() > prob:
             sim_reg = qarg.ref.sim_reg
