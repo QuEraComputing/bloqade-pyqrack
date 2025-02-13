@@ -1,6 +1,11 @@
+import typing
+
 from kirin import interp
 from bloqade.noise import native
 from bloqade.pyqrack import PyQrackInterpreter, reg
+
+if typing.TYPE_CHECKING:
+    from pyqrack import QrackSimulator
 
 
 @native.dialect.register(key="pyqrack")
@@ -83,9 +88,13 @@ class PyQrackMethods(interp.MethodTable):
         stmt: native.AtomLossChannel,
     ):
         prob: float = frame.get(stmt.prob)
-        qarg: reg.SimQubitRef = frame.get(stmt.qarg)
+        qarg: reg.SimQubitRef["QrackSimulator"] = frame.get_typed(
+            stmt.qarg, reg.SimQubitRef
+        )
 
         if qarg.is_active() and interp.rng_state.uniform() > prob:
+            sim_reg = qarg.ref.sim_reg
+            sim_reg.force_m(qarg.addr, 1)
             qarg.drop()
 
         return ()
