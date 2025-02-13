@@ -31,7 +31,7 @@ SimRegType = TypeVar("SimRegType")
 
 
 @dataclass(frozen=True)
-class SimQRegister(QReg, Generic[SimRegType]):
+class SimQReg(QReg, Generic[SimRegType]):
     size: int
     sim_reg: SimRegType
     addrs: tuple[int, ...]
@@ -42,12 +42,12 @@ class SimQRegister(QReg, Generic[SimRegType]):
         self.qubit_state[pos] = QubitState.Lost
 
     def __getitem__(self, pos: int):
-        return SimQubitRef(self, pos)
+        return SimQubit(self, pos)
 
 
 @dataclass(frozen=True)
-class SimQubitRef(Qubit, Generic[SimRegType]):
-    ref: SimQRegister[SimRegType]
+class SimQubit(Qubit, Generic[SimRegType]):
+    ref: SimQReg[SimRegType]
     pos: int
 
     @property

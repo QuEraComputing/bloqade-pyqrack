@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING, Any
 
 from kirin import interp
 from kirin.dialects import ilist
-from bloqade.pyqrack.reg import SimQubitRef
+from bloqade.pyqrack.reg import SimQubit
 from bloqade.pyqrack.base import PyQrackInterpreter
 from bloqade.qasm2.dialects import parallel
 
@@ -16,8 +16,8 @@ class PyQrackMethods(interp.MethodTable):
     @interp.impl(parallel.CZ)
     def cz(self, interp: PyQrackInterpreter, frame: interp.Frame, stmt: parallel.CZ):
 
-        qargs: ilist.IList[SimQubitRef["QrackSimulator"], Any] = frame.get(stmt.qargs)
-        ctrls: ilist.IList[SimQubitRef["QrackSimulator"], Any] = frame.get(stmt.ctrls)
+        qargs: ilist.IList[SimQubit["QrackSimulator"], Any] = frame.get(stmt.qargs)
+        ctrls: ilist.IList[SimQubit["QrackSimulator"], Any] = frame.get(stmt.ctrls)
         for qarg, ctrl in zip(qargs, ctrls):
             if qarg.is_active() and ctrl.is_active():
                 interp.memory.sim_reg.mcz(qarg, ctrl)
@@ -27,7 +27,7 @@ class PyQrackMethods(interp.MethodTable):
     def ugate(
         self, interp: PyQrackInterpreter, frame: interp.Frame, stmt: parallel.UGate
     ):
-        qargs: ilist.IList[SimQubitRef["QrackSimulator"], Any] = frame.get(stmt.qargs)
+        qargs: ilist.IList[SimQubit["QrackSimulator"], Any] = frame.get(stmt.qargs)
         theta, phi, lam = (
             frame.get(stmt.theta),
             frame.get(stmt.phi),
@@ -40,7 +40,7 @@ class PyQrackMethods(interp.MethodTable):
 
     @interp.impl(parallel.RZ)
     def rz(self, interp: PyQrackInterpreter, frame: interp.Frame, stmt: parallel.RZ):
-        qargs: ilist.IList[SimQubitRef["QrackSimulator"], Any] = frame.get(stmt.qargs)
+        qargs: ilist.IList[SimQubit["QrackSimulator"], Any] = frame.get(stmt.qargs)
         phi = frame.get(stmt.theta)
         for qarg in qargs:
             if qarg.is_active():

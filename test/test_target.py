@@ -21,7 +21,7 @@ def test_target():
 
     q = target.run(ghz)
 
-    assert isinstance(q, reg.SimQRegister)
+    assert isinstance(q, reg.SimQReg)
     assert isinstance(q.sim_reg, QrackSimulator)
 
     out = q.sim_reg.out_ket()
