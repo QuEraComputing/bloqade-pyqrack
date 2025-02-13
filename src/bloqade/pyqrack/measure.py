@@ -6,13 +6,13 @@ from functools import reduce
 
 import numpy as np
 
-from .reg import SimQubitRef
+from .reg import SimQubit
 
 if TYPE_CHECKING:
     from pyqrack.qrack_simulator import QrackSimulator  # noqa: F401
 
 
-QrackQubitId = SimQubitRef["QrackSimulator"]
+QrackQubitId = SimQubit["QrackSimulator"]
 
 
 @dataclasses.dataclass(frozen=True)

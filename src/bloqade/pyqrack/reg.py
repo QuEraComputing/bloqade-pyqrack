@@ -2,30 +2,7 @@ import enum
 from typing import List, Generic, TypeVar
 from dataclasses import dataclass
 
-
-class QubitState(enum.Enum):
-    Active = enum.auto()
-    Lost = enum.auto()
-
-
-@dataclass(frozen=True)
-class QRegister:
-    size: int
-
-    def __hash__(self):
-        return id(self)
-
-    def __eq__(self, other):
-        return self is other
-
-    def __getitem__(self, pos: int):
-        return QubitRef(self, pos)
-
-
-@dataclass(frozen=True)
-class QubitRef:
-    ref: QRegister
-    pos: int
+from bloqade.qasm2.types import QReg, Qubit
 
 
 class CRegister(list[bool]):
@@ -52,11 +29,16 @@ class CBitRef:
         return self.ref[self.pos]
 
 
+class QubitState(enum.Enum):
+    Active = enum.auto()
+    Lost = enum.auto()
+
+
 SimRegType = TypeVar("SimRegType")
 
 
 @dataclass(frozen=True)
-class SimQRegister(Generic[SimRegType]):
+class SimQReg(QReg, Generic[SimRegType]):
     """Simulation runtime value of a quantum register."""
 
     size: int
@@ -82,14 +64,14 @@ class SimQRegister(Generic[SimRegType]):
         self.qubit_state[pos] = QubitState.Lost
 
     def __getitem__(self, pos: int):
-        return SimQubitRef(self, pos)
+        return SimQubit(self, pos)
 
 
 @dataclass(frozen=True)
-class SimQubitRef(QubitRef, Generic[SimRegType]):
+class SimQubit(Qubit, Generic[SimRegType]):
     """The runtime representation of a qubit reference."""
 
-    ref: SimQRegister[SimRegType]
+    ref: SimQReg[SimRegType]
     """The quantum register that is holding this qubit."""
 
     pos: int
