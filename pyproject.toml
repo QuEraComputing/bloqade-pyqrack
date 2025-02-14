@@ -1,6 +1,6 @@
 [project]
 name = "bloqade-runtime-pyqrack"
-version = "0.1.0"
+version = "0.1.1"
 description = "Runtime for bloqade using the Qrack simulator."
 readme = "README.md"
 authors = [
