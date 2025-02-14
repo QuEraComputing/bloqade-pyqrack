@@ -32,8 +32,8 @@ class PyQrack:
         fold = Fold(mt.dialects)
         fold(mt)
         address_analysis = AddressAnalysis(mt.dialects)
-        results, ret = address_analysis.run_analysis(mt)
-        if any(isinstance(a, AnyAddress) for a in results.values()):
+        frame, ret = address_analysis.run_analysis(mt)
+        if any(isinstance(a, AnyAddress) for a in frame.entries.values()):
             raise ValueError("All addresses must be resolved.")
 
         num_qubits = max(address_analysis.qubit_count, self.min_qubits)
@@ -57,8 +57,8 @@ class PyQrack:
         """Run the given kernel method on the PyQrack `_shots` times, caching analysis results."""
 
         address_analysis = AddressAnalysis(mt.dialects)
-        results, ret = address_analysis.run_analysis(mt)
-        if any(isinstance(a, AnyAddress) for a in results.values()):
+        frame, ret = address_analysis.run_analysis(mt)
+        if any(isinstance(a, AnyAddress) for a in frame.entries.values()):
             raise ValueError("All addresses must be resolved.")
 
         memory = Memory(
