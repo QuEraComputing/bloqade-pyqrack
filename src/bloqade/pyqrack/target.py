@@ -41,7 +41,7 @@ class PyQrack:
         fold(mt)
         address_analysis = AddressAnalysis(mt.dialects)
         results, ret = address_analysis.run_analysis(mt)
-        if any(isinstance(a, AnyAddress) for a in results.values()):
+        if any(isinstance(a, AnyAddress) for a in results.entries.values()):
             raise ValueError("All addresses must be resolved.")
 
         num_qubits = max(address_analysis.qubit_count, self.min_qubits)
@@ -77,7 +77,7 @@ class PyQrack:
 
         address_analysis = AddressAnalysis(mt.dialects)
         results, ret = address_analysis.run_analysis(mt)
-        if any(isinstance(a, AnyAddress) for a in results.values()):
+        if any(isinstance(a, AnyAddress) for a in results.entries.values()):
             raise ValueError("All addresses must be resolved.")
 
         memory = Memory(
