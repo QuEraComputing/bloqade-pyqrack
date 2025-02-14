@@ -1,4 +1,4 @@
-from typing import List, TypeVar, ParamSpec
+from typing import Any, Dict, List, TypeVar, ParamSpec
 from dataclasses import field, dataclass
 
 from kirin import ir
@@ -11,6 +11,12 @@ Params = ParamSpec("Params")
 RetType = TypeVar("RetType")
 
 
+def _default_pyqrack_args():
+    return {
+        "isTensorNetwork": False,
+        "isOpenCL": False,
+    }
+
 @dataclass
 class PyQrack:
     """PyQrack target runtime for Bloqade."""
@@ -19,7 +25,10 @@ class PyQrack:
     """Minimum number of qubits required for the PyQrack simulator.
     Useful when address analysis fails to determine the number of qubits.
     """
-    memory: Memory | None = field(init=False)
+    pyqrack_options: Dict[str, Any] = field(default_factory=_default_pyqrack_args)
+    """Options to pass to the QrackSimulator object, node `qubitCount` will be overwritten."""
+
+    memory: Memory | None = field(init=False, default=None)
 
     def run(
         self,
@@ -45,11 +54,12 @@ class PyQrack:
             raise ValueError("All addresses must be resolved.")
 
         num_qubits = max(address_analysis.qubit_count, self.min_qubits)
+        self.pyqrack_options.pop("qubitCount")
         self.memory = Memory(
             num_qubits,
             allocated=0,
             sim_reg=QrackSimulator(
-                qubitCount=num_qubits, isTensorNetwork=False, isOpenCL=False
+                qubitCount=num_qubits, **self.pyqrack_options
             ),
         )
         interpreter = PyQrackInterpreter(mt.dialects, memory=self.memory)
@@ -85,8 +95,7 @@ class PyQrack:
             allocated=0,
             sim_reg=QrackSimulator(
                 qubitCount=address_analysis.next_address,
-                isTensorNetwork=False,
-                isOpenCL=False,
+                **self.pyqrack_options,
             ),
         )
 
