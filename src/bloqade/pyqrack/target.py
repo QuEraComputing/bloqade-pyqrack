@@ -17,6 +17,7 @@ def _default_pyqrack_args():
         "isOpenCL": False,
     }
 
+
 @dataclass
 class PyQrack:
     """PyQrack target runtime for Bloqade."""
@@ -58,9 +59,7 @@ class PyQrack:
         self.memory = Memory(
             num_qubits,
             allocated=0,
-            sim_reg=QrackSimulator(
-                qubitCount=num_qubits, **self.pyqrack_options
-            ),
+            sim_reg=QrackSimulator(qubitCount=num_qubits, **self.pyqrack_options),
         )
         interpreter = PyQrackInterpreter(mt.dialects, memory=self.memory)
         return interpreter.run(mt, args, kwargs).expect()
