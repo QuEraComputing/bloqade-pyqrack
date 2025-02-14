@@ -55,7 +55,7 @@ class PyQrack:
             raise ValueError("All addresses must be resolved.")
 
         num_qubits = max(address_analysis.qubit_count, self.min_qubits)
-        self.pyqrack_options.pop("qubitCount")
+        self.pyqrack_options.pop("qubitCount", None)
         self.memory = Memory(
             num_qubits,
             allocated=0,
