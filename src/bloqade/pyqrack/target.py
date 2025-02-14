@@ -1,5 +1,5 @@
 from typing import List, TypeVar, ParamSpec
-from dataclasses import dataclass
+from dataclasses import field, dataclass
 
 from kirin import ir
 from pyqrack import QrackSimulator
@@ -19,8 +19,7 @@ class PyQrack:
     """Minimum number of qubits required for the PyQrack simulator.
     Useful when address analysis fails to determine the number of qubits.
     """
-    memory: Memory | None = None
-    """Memory for the PyQrack simulator."""
+    memory: Memory | None = field(init=False)
 
     def run(
         self,
@@ -28,7 +27,16 @@ class PyQrack:
         *args: Params.args,
         **kwargs: Params.kwargs,
     ) -> RetType:
-        """Run the given kernel method on the PyQrack simulator."""
+        """Run the given kernel method on the PyQrack simulator.
+
+        Args
+            mt (Method):
+                The kernel method to run.
+
+        Returns
+            The result of the kernel method, if any.
+
+        """
         fold = Fold(mt.dialects)
         fold(mt)
         address_analysis = AddressAnalysis(mt.dialects)
@@ -54,7 +62,18 @@ class PyQrack:
         *args: Params.args,
         **kwargs: Params.kwargs,
     ) -> List[RetType]:
-        """Run the given kernel method on the PyQrack `_shots` times, caching analysis results."""
+        """Run the given kernel method on the PyQrack `_shots` times, caching analysis results.
+
+        Args
+            mt (Method):
+                The kernel method to run.
+            _shots (int):
+                The number of times to run the kernel method.
+
+        Returns
+            List of results of the kernel method, one for each shot.
+
+        """
 
         address_analysis = AddressAnalysis(mt.dialects)
         frame, ret = address_analysis.run_analysis(mt)
