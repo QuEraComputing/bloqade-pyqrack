@@ -67,33 +67,35 @@ class PyQrackMethods(interp.MethodTable):
                 frame.get(stmt.lam),
             )
         return ()
-    
+
     @interp.impl(uop.Id)
     def id(self, interp: interp.Interpreter, frame: interp.Frame, stmt: uop.Id):
         return ()
-    
+
     @interp.impl(uop.SX)
     def sx(self, interp: interp.Interpreter, frame: interp.Frame, stmt: uop.SX):
         qarg: SimQubit["QrackSimulator"] = frame.get(stmt.qarg)
         if qarg.is_active():
-            qarg.sim_reg.u(qarg.addr, math.pi/2, math.pi/2, -math.pi/2)
+            qarg.sim_reg.u(qarg.addr, math.pi / 2, math.pi / 2, -math.pi / 2)
         return ()
 
     @interp.impl(uop.SXdag)
     def sx_dag(self, interp: interp.Interpreter, frame: interp.Frame, stmt: uop.SX):
         qarg: SimQubit["QrackSimulator"] = frame.get(stmt.qarg)
         if qarg.is_active():
-            qarg.sim_reg.u(qarg.addr, math.pi * (1.5), math.pi/2, math.pi/2)
+            qarg.sim_reg.u(qarg.addr, math.pi * (1.5), math.pi / 2, math.pi / 2)
         return ()
-    
+
     @interp.impl(uop.CSX)
     def csx(self, interp: interp.Interpreter, frame: interp.Frame, stmt: uop.CSX):
         qarg: SimQubit["QrackSimulator"] = frame.get(stmt.qarg)
         ctrl: SimQubit["QrackSimulator"] = frame.get(stmt.ctrl)
         if qarg.is_active() and ctrl.is_active():
-            qarg.sim_reg.mcu([ctrl.addr], qarg.addr, math.pi/2, math.pi/2, -math.pi/2)
+            qarg.sim_reg.mcu(
+                [ctrl.addr], qarg.addr, math.pi / 2, math.pi / 2, -math.pi / 2
+            )
         return ()
-    
+
     @interp.impl(uop.Swap)
     def swap(self, interp: interp.Interpreter, frame: interp.Frame, stmt: uop.Swap):
         qarg1: SimQubit["QrackSimulator"] = frame.get(stmt.qarg)
@@ -101,7 +103,7 @@ class PyQrackMethods(interp.MethodTable):
         if qarg1.is_active() and qarg2.is_active():
             qarg1.sim_reg.swap(qarg1.addr, qarg2.addr)
         return ()
-    
+
     @interp.impl(uop.CSwap)
     def cswap(self, interp: interp.Interpreter, frame: interp.Frame, stmt: uop.CSwap):
         qarg1: SimQubit["QrackSimulator"] = frame.get(stmt.qarg1)
@@ -175,7 +177,9 @@ class PyQrackMethods(interp.MethodTable):
         ctrl: SimQubit["QrackSimulator"] = frame.get(stmt.ctrl)
         qarg: SimQubit["QrackSimulator"] = frame.get(stmt.qarg)
         if qarg.is_active() and ctrl.is_active():
-            qarg.sim_reg.mcr(self.AXIS_MAP[stmt.name], frame.get(stmt.lam), [ctrl.addr], qarg.addr)
+            qarg.sim_reg.mcr(
+                self.AXIS_MAP[stmt.name], frame.get(stmt.lam), [ctrl.addr], qarg.addr
+            )
         return ()
 
     @interp.impl(uop.CU1)
@@ -199,7 +203,7 @@ class PyQrackMethods(interp.MethodTable):
                 frame.get(stmt.lam),
             )
         return ()
-    
+
     @interp.impl(uop.CU)
     def cu(self, interp: interp.Interpreter, frame: interp.Frame, stmt: uop.CU):
         ctrl: SimQubit["QrackSimulator"] = frame.get(stmt.ctrl)
@@ -214,7 +218,7 @@ class PyQrackMethods(interp.MethodTable):
                 frame.get(stmt.lam),
             )
         return ()
-    
+
     @interp.impl(uop.RXX)
     def rxx(self, interp: interp.Interpreter, frame: interp.Frame, stmt: uop.RXX):
         a: SimQubit["QrackSimulator"] = frame.get(stmt.qarg)
@@ -222,17 +226,16 @@ class PyQrackMethods(interp.MethodTable):
         theta = frame.get(stmt.theta)
         sim_reg = a.sim_reg
         if a.is_active() and b.is_active():
-            sim_reg.u(a.addr, math.pi/2, theta, 0)
-            sim_reg.h(b.addr)         
+            sim_reg.u(a.addr, math.pi / 2, theta, 0)
+            sim_reg.h(b.addr)
             sim_reg.mcx([a.addr], b.addr)
             sim_reg.u(b.addr, 0, 0, -theta)
             sim_reg.mcx([a.addr], b.addr)
             sim_reg.h(b.addr)
-            sim_reg.u(a.addr, math.pi/2, -math.pi, math.pi - theta)
-            
+            sim_reg.u(a.addr, math.pi / 2, -math.pi, math.pi - theta)
 
         return ()
-    
+
     @interp.impl(uop.RZZ)
     def rzz(self, interp: interp.Interpreter, frame: interp.Frame, stmt: uop.RZZ):
         a: SimQubit["QrackSimulator"] = frame.get(stmt.qarg)
