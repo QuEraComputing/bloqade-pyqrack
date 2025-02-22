@@ -98,8 +98,8 @@ class PyQrackMethods(interp.MethodTable):
 
     @interp.impl(uop.Swap)
     def swap(self, interp: interp.Interpreter, frame: interp.Frame, stmt: uop.Swap):
-        qarg1: SimQubit["QrackSimulator"] = frame.get(stmt.qarg)
-        qarg2: SimQubit["QrackSimulator"] = frame.get(stmt.ctrl)
+        qarg1: SimQubit["QrackSimulator"] = frame.get(stmt.ctrl)
+        qarg2: SimQubit["QrackSimulator"] = frame.get(stmt.qarg)
         if qarg1.is_active() and qarg2.is_active():
             qarg1.sim_reg.swap(qarg1.addr, qarg2.addr)
         return ()
