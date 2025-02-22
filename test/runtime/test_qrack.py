@@ -2,6 +2,7 @@ import math
 from unittest.mock import Mock, call
 
 from kirin import ir
+from pytest import mark
 from bloqade import qasm2, pyqrack
 
 
@@ -87,7 +88,9 @@ def test_u_gates():
     )
 
 
+@mark.xfail(reason="binding for swap not implemented")
 def test_basic_control_gates():
+
     @qasm2.main
     def program():
         q = qasm2.qreg(3)
@@ -97,7 +100,7 @@ def test_basic_control_gates():
         qasm2.cz(q[2], q[0])
         qasm2.ch(q[0], q[1])
         qasm2.csx(q[1], q[2])
-        qasm2.swap(q[0], q[2])
+        qasm2.swap(q[0], q[2])  # requires new bloqade version
 
     sim_reg = run_mock(3, program)
     sim_reg.assert_has_calls(
