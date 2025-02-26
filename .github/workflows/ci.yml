@@ -43,8 +43,8 @@ jobs:
       - name: Install the project
         run: |
           cd bloqade-pyqrack
-          uv add --extra qasm2 ../bloqade
           uv sync --extra pyqrack-cpu --dev
+          uv add --extra qasm2 ../bloqade
       - name: Run tests
         # For example, using `pytest`
         run: uv run just coverage
