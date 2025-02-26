@@ -4,7 +4,7 @@ from bloqade import qasm2
 from bloqade.noise import native
 from bloqade.pyqrack import Memory, PyQrackInterpreter, reg
 
-simulation = qasm2.main.add(native)
+simulation = qasm2.extended.add(native)
 
 
 def test_atom_loss():
@@ -12,8 +12,8 @@ def test_atom_loss():
     @simulation
     def test_atom_loss():
         q = qasm2.qreg(2)
-        native.atom_loss_channel(0.5, q[0])
-        native.atom_loss_channel(0.8, q[1])
+        native.atom_loss_channel([q[0]], prob=0.5)
+        native.atom_loss_channel([q[1]], prob=0.8)
 
         return q
 
