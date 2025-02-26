@@ -1,10 +1,10 @@
-import typing
+from typing import TYPE_CHECKING, List
 
 from kirin import interp
 from bloqade.noise import native
 from bloqade.pyqrack import PyQrackInterpreter, reg
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from pyqrack import QrackSimulator
 
 
@@ -36,47 +36,49 @@ class PyQrackMethods(interp.MethodTable):
         frame: interp.Frame,
         stmt: native.PauliChannel,
     ):
-        px: float = frame.get(stmt.px)
-        py: float = frame.get(stmt.py)
-        pz: float = frame.get(stmt.pz)
-        qarg: reg.SimQubit = frame.get(stmt.qarg)
+        qargs: List[reg.SimQubit] = frame.get(stmt.qargs)
 
-        if qarg.is_active():
-            self.apply_pauli_error(interp, qarg, px, py, pz)
+        active_qubits = (qarg for qarg in qargs if qarg.is_active())
+
+        for qarg in active_qubits:
+            self.apply_pauli_error(interp, qarg, stmt.px, stmt.py, stmt.pz)
 
         return ()
 
     @interp.impl(native.CZPauliChannel)
-    def cz_pauli_unpaired(
+    def cz_pauli_channel(
         self,
         interp: PyQrackInterpreter,
         frame: interp.Frame,
         stmt: native.CZPauliChannel,
     ):
-        px_1: float = frame.get(stmt.px_1)
-        py_1: float = frame.get(stmt.py_1)
-        pz_1: float = frame.get(stmt.pz_1)
-        qarg1: reg.SimQubit = frame.get(stmt.qarg1)
 
-        px_2: float = frame.get(stmt.px_2)
-        py_2: float = frame.get(stmt.py_2)
-        pz_2: float = frame.get(stmt.pz_2)
-        qarg2: reg.SimQubit = frame.get(stmt.qarg2)
+        qargs: List[reg.SimQubit] = frame.get(stmt.qargs)
+        ctrls: List[reg.SimQubit] = frame.get(stmt.ctrls)
 
-        is_active_1 = qarg1.is_active()
-        is_active_2 = qarg2.is_active()
-        is_both_active = is_active_1 and is_active_2
+        if stmt.paired:
+            valid_pairs = (
+                (ctrl, qarg)
+                for ctrl, qarg in zip(ctrls, qargs)
+                if ctrl.is_active() and qarg.is_active()
+            )
+        else:
+            valid_pairs = (
+                (ctrl, qarg)
+                for ctrl, qarg in zip(ctrls, qargs)
+                if ctrl.is_active() ^ qarg.is_active()
+            )
 
-        if stmt.paired and is_both_active:
-            self.apply_pauli_error(interp, qarg1, px_1, py_1, pz_1)
-            self.apply_pauli_error(interp, qarg2, px_2, py_2, pz_2)
-        elif not stmt.paired:
-            if is_both_active:
-                return ()
-            elif is_active_1:
-                self.apply_pauli_error(interp, qarg1, px_1, py_1, pz_1)
-            elif is_active_2:
-                self.apply_pauli_error(interp, qarg2, px_2, py_2, pz_2)
+        for ctrl, qarg in valid_pairs:
+            if ctrl.is_active():
+                self.apply_pauli_error(
+                    interp, ctrl, stmt.px_ctrl, stmt.py_ctrl, stmt.pz_ctrl
+                )
+
+            if qarg.is_active():
+                self.apply_pauli_error(
+                    interp, qarg, stmt.px_qarg, stmt.py_qarg, stmt.pz_qarg
+                )
 
         return ()
 
@@ -87,12 +89,14 @@ class PyQrackMethods(interp.MethodTable):
         frame: interp.Frame,
         stmt: native.AtomLossChannel,
     ):
-        prob: float = frame.get(stmt.prob)
-        qarg: reg.SimQubit["QrackSimulator"] = frame.get_typed(stmt.qarg, reg.SimQubit)
+        qargs: List[reg.SimQubit["QrackSimulator"]] = frame.get(stmt.qargs)
 
-        if qarg.is_active() and interp.rng_state.uniform() > prob:
-            sim_reg = qarg.ref.sim_reg
-            sim_reg.force_m(qarg.addr, 1)
-            qarg.drop()
+        active_qubits = (qarg for qarg in qargs if qarg.is_active())
+
+        for qarg in active_qubits:
+            if interp.rng_state.uniform() > stmt.prob:
+                sim_reg = qarg.ref.sim_reg
+                sim_reg.force_m(qarg.addr, 1)
+                qarg.drop()
 
         return ()

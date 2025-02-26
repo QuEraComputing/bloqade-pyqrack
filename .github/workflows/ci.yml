@@ -19,7 +19,15 @@ jobs:
         python-version: ["3.10", "3.11", "3.12"]
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Checkout bloqade
+        uses: actions/checkout@v4
+        with:
+          repository: QuEraComputing/bloqade
+          path: bloqade
+          ref: main
       - name: Install uv
         uses: astral-sh/setup-uv@v5
         with:
@@ -30,7 +38,9 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         run: uv python install ${{ matrix.python-version }}
       - name: Install the project
-        run: uv sync --extra pyqrack-cpu --dev
+        run: |
+          uv sync --extra pyqrack-cpu --dev
+          uv add --extra qasm2 bloqade/
       - name: Run tests
         # For example, using `pytest`
         run: uv run just coverage
