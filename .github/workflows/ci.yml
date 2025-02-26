@@ -21,9 +21,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          path: bloqade-pyqrack
-          ref: main
 
       - name: Checkout bloqade
         uses: actions/checkout@v4
@@ -44,7 +41,7 @@ jobs:
         run: |
           cd bloqade-pyqrack
           uv sync --extra pyqrack-cpu --dev
-          uv add --extra qasm2 ../bloqade
+          uv add --extra qasm2 bloqade/
       - name: Run tests
         # For example, using `pytest`
         run: uv run just coverage
