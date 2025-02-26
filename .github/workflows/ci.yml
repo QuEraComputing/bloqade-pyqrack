@@ -24,7 +24,7 @@ jobs:
         with:
           path: bloqade-pyqrack
           ref: main
-      
+
       - name: Checkout bloqade
         uses: actions/checkout@v4
         with:
