@@ -39,7 +39,6 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
       - name: Install the project
         run: |
-          cd bloqade-pyqrack
           uv sync --extra pyqrack-cpu --dev
           uv add --extra qasm2 bloqade/
       - name: Run tests
