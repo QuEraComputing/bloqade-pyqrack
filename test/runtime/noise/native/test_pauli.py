@@ -5,7 +5,7 @@ from bloqade import qasm2
 from bloqade.noise import native
 from bloqade.pyqrack import Memory, PyQrackInterpreter
 
-simulation = qasm2.main.add(native)
+simulation = qasm2.extended.add(native)
 
 
 def run_mock(size, program: ir.Method, rng_state: Mock) -> Mock:
@@ -22,8 +22,18 @@ def test_pauli_channel():
     @simulation
     def test_atom_loss():
         q = qasm2.qreg(2)
-        native.pauli_channel(0.1, 0.4, 0.3, q[0])
-        native.pauli_channel(0.1, 0.4, 0.3, q[1])
+        native.pauli_channel(
+            [q[0]],
+            px=0.1,
+            py=0.4,
+            pz=0.3,
+        )
+        native.pauli_channel(
+            [q[1]],
+            px=0.1,
+            py=0.4,
+            pz=0.3,
+        )
         return q
 
     rng_state = Mock()
@@ -36,15 +46,36 @@ def test_cz_pauli_channel_false():
     @simulation
     def test_atom_loss():
         q = qasm2.qreg(2)
-        native.atom_loss_channel(0.7, q[0])
-        native.atom_loss_channel(0.7, q[1])
+        native.atom_loss_channel([q[0]], prob=0.7)
+        native.atom_loss_channel(
+            qargs=[q[1]],
+            prob=0.7,
+        )
         native.cz_pauli_channel(
-            0.1, 0.4, 0.3, 0.2, 0.2, 0.2, q[0], q[1], paired=False
+            [q[0]],
+            [q[1]],
+            px_ctrl=0.1,
+            py_ctrl=0.4,
+            pz_ctrl=0.3,
+            px_qarg=0.2,
+            py_qarg=0.2,
+            pz_qarg=0.2,
+            paired=False,
         )  # no noise here
         qasm2.cz(q[0], q[1])
-        native.atom_loss_channel(0.4, q[0])
-        native.atom_loss_channel(0.7, q[1])
-        native.cz_pauli_channel(0.1, 0.4, 0.3, 0.2, 0.2, 0.2, q[0], q[1], paired=False)
+        native.atom_loss_channel([q[0]], prob=0.4)
+        native.atom_loss_channel([q[1]], prob=0.7)
+        native.cz_pauli_channel(
+            [q[0]],
+            [q[1]],
+            px_ctrl=0.1,
+            py_ctrl=0.4,
+            pz_ctrl=0.3,
+            px_qarg=0.2,
+            py_qarg=0.2,
+            pz_qarg=0.2,
+            paired=False,
+        )
         qasm2.cz(q[0], q[1])
         return q
 
@@ -59,15 +90,33 @@ def test_cz_pauli_channel_true():
     @simulation
     def test_atom_loss():
         q = qasm2.qreg(2)
-        native.atom_loss_channel(0.7, q[0])
-        native.atom_loss_channel(0.7, q[1])
+        native.atom_loss_channel([q[0]], prob=0.7)
+        native.atom_loss_channel([q[1]], prob=0.7)
         native.cz_pauli_channel(
-            0.1, 0.4, 0.3, 0.2, 0.2, 0.2, q[0], q[1], paired=True
+            [q[0]],
+            [q[1]],
+            px_ctrl=0.1,
+            py_ctrl=0.4,
+            pz_ctrl=0.3,
+            px_qarg=0.2,
+            py_qarg=0.2,
+            pz_qarg=0.2,
+            paired=True,
         )  # no noise here
         qasm2.cz(q[0], q[1])
-        native.atom_loss_channel(0.4, q[0])
-        native.atom_loss_channel(0.7, q[1])
-        native.cz_pauli_channel(0.1, 0.4, 0.3, 0.2, 0.2, 0.2, q[0], q[1], paired=True)
+        native.atom_loss_channel([q[0]], prob=0.4)
+        native.atom_loss_channel([q[1]], prob=0.7)
+        native.cz_pauli_channel(
+            [q[0]],
+            [q[1]],
+            px_ctrl=0.1,
+            py_ctrl=0.4,
+            pz_ctrl=0.3,
+            px_qarg=0.2,
+            py_qarg=0.2,
+            pz_qarg=0.2,
+            paired=True,
+        )
         qasm2.cz(q[0], q[1])
         return q
 

@@ -38,15 +38,15 @@ class PyQrackMethods(interp.MethodTable):
     ):
         qargs: List[reg.SimQubit] = frame.get(stmt.qargs)
 
-        active = (qarg for qarg in qargs if qarg.is_active())
+        active_qubits = (qarg for qarg in qargs if qarg.is_active())
 
-        for qarg in active:
+        for qarg in active_qubits:
             self.apply_pauli_error(interp, qarg, stmt.px, stmt.py, stmt.pz)
 
         return ()
 
     @interp.impl(native.CZPauliChannel)
-    def cz_pauli_unpaired(
+    def cz_pauli_channel(
         self,
         interp: PyQrackInterpreter,
         frame: interp.Frame,
@@ -70,12 +70,15 @@ class PyQrackMethods(interp.MethodTable):
             )
 
         for ctrl, qarg in valid_pairs:
-            self.apply_pauli_error(
-                interp, ctrl, stmt.px_ctrl, stmt.py_ctrl, stmt.pz_ctrl
-            )
-            self.apply_pauli_error(
-                interp, qarg, stmt.px_qarg, stmt.py_qarg, stmt.pz_qarg
-            )
+            if ctrl.is_active():
+                self.apply_pauli_error(
+                    interp, ctrl, stmt.px_ctrl, stmt.py_ctrl, stmt.pz_ctrl
+                )
+
+            if qarg.is_active():
+                self.apply_pauli_error(
+                    interp, qarg, stmt.px_qarg, stmt.py_qarg, stmt.pz_qarg
+                )
 
         return ()
 
