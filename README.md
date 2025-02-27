@@ -17,10 +17,12 @@ Bloqade is a Python SDK for neutral atom quantum computing. It provides a set of
 
 ## Installation
 
+This package has three different optional dependencies to decide which one, or multiple your system supports: `pyqrack`, `pyqrack-cpu`, `pyqrack-cuda`. 
+
 ### Install via `uv` (Recommended)
 
 ```py
-uv add bloqade
+uv add bloqade-pyqrack[...]
 ```
 
 ## License
