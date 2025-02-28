@@ -13,7 +13,7 @@ class PyQrackMethods(interp.MethodTable):
     def apply_pauli_error(
         self,
         interp: PyQrackInterpreter,
-        qarg: reg.SimQubit,
+        qarg: reg.PyQrackQubit,
         px: float,
         py: float,
         pz: float,
@@ -36,7 +36,7 @@ class PyQrackMethods(interp.MethodTable):
         frame: interp.Frame,
         stmt: native.PauliChannel,
     ):
-        qargs: List[reg.SimQubit] = frame.get(stmt.qargs)
+        qargs: List[reg.PyQrackQubit] = frame.get(stmt.qargs)
 
         active_qubits = (qarg for qarg in qargs if qarg.is_active())
 
@@ -53,8 +53,8 @@ class PyQrackMethods(interp.MethodTable):
         stmt: native.CZPauliChannel,
     ):
 
-        qargs: List[reg.SimQubit] = frame.get(stmt.qargs)
-        ctrls: List[reg.SimQubit] = frame.get(stmt.ctrls)
+        qargs: List[reg.PyQrackQubit] = frame.get(stmt.qargs)
+        ctrls: List[reg.PyQrackQubit] = frame.get(stmt.ctrls)
 
         if stmt.paired:
             valid_pairs = (
@@ -89,7 +89,7 @@ class PyQrackMethods(interp.MethodTable):
         frame: interp.Frame,
         stmt: native.AtomLossChannel,
     ):
-        qargs: List[reg.SimQubit["QrackSimulator"]] = frame.get(stmt.qargs)
+        qargs: List[reg.PyQrackQubit["QrackSimulator"]] = frame.get(stmt.qargs)
 
         active_qubits = (qarg for qarg in qargs if qarg.is_active())
 

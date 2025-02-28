@@ -1,8 +1,11 @@
 import enum
-from typing import List, Generic, TypeVar
+from typing import TYPE_CHECKING, List
 from dataclasses import dataclass
 
 from bloqade.qasm2.types import QReg, Qubit
+
+if TYPE_CHECKING:
+    from pyqrack import QrackSimulator
 
 
 class CRegister(list[bool]):
@@ -34,17 +37,14 @@ class QubitState(enum.Enum):
     Lost = enum.auto()
 
 
-SimRegType = TypeVar("SimRegType")
-
-
 @dataclass(frozen=True)
-class SimQReg(QReg, Generic[SimRegType]):
+class PyQrackReg(QReg):
     """Simulation runtime value of a quantum register."""
 
     size: int
     """The number of qubits in this register."""
 
-    sim_reg: SimRegType
+    sim_reg: "QrackSimulator"
     """The register of the simulator."""
 
     addrs: tuple[int, ...]
@@ -64,21 +64,21 @@ class SimQReg(QReg, Generic[SimRegType]):
         self.qubit_state[pos] = QubitState.Lost
 
     def __getitem__(self, pos: int):
-        return SimQubit(self, pos)
+        return PyQrackQubit(self, pos)
 
 
 @dataclass(frozen=True)
-class SimQubit(Qubit, Generic[SimRegType]):
+class PyQrackQubit(Qubit):
     """The runtime representation of a qubit reference."""
 
-    ref: SimQReg[SimRegType]
+    ref: PyQrackReg
     """The quantum register that is holding this qubit."""
 
     pos: int
     """The position of this qubit in the quantum register."""
 
     @property
-    def sim_reg(self) -> SimRegType:
+    def sim_reg(self):
         """The register of the simulator."""
         return self.ref.sim_reg
 

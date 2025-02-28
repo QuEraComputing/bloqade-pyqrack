@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 
 from kirin import interp
-from bloqade.pyqrack.reg import CBitRef, SimQReg, SimQubit, CRegister, QubitState
+from bloqade.pyqrack.reg import CBitRef, CRegister, PyQrackReg, QubitState, PyQrackQubit
 from bloqade.pyqrack.base import PyQrackInterpreter
 from bloqade.qasm2.dialects import core
 
@@ -28,7 +28,7 @@ class PyQrackMethods(interp.MethodTable):
             )
 
         return (
-            SimQReg(
+            PyQrackReg(
                 size=n_qubits,
                 sim_reg=interp.memory.sim_reg,
                 addrs=tuple(range(curr_allocated, curr_allocated + n_qubits)),
@@ -47,7 +47,7 @@ class PyQrackMethods(interp.MethodTable):
     def qreg_get(
         self, interp: PyQrackInterpreter, frame: interp.Frame, stmt: core.QRegGet
     ):
-        return (SimQubit(ref=frame.get(stmt.reg), pos=frame.get(stmt.idx)),)
+        return (PyQrackQubit(ref=frame.get(stmt.reg), pos=frame.get(stmt.idx)),)
 
     @interp.impl(core.CRegGet)
     def creg_get(
@@ -61,7 +61,7 @@ class PyQrackMethods(interp.MethodTable):
     def measure(
         self, interp: PyQrackInterpreter, frame: interp.Frame, stmt: core.Measure
     ):
-        qarg: SimQubit["QrackSimulator"] = frame.get(stmt.qarg)
+        qarg: PyQrackQubit["QrackSimulator"] = frame.get(stmt.qarg)
         carg: CBitRef = frame.get(stmt.carg)
         carg.set_value(bool(qarg.ref.sim_reg.m(qarg.addr)))
 
