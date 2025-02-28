@@ -39,8 +39,8 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
       - name: Install the project
         run: |
-          uv sync --extra pyqrack-cpu --dev
           uv add --extra qasm2 bloqade/
+          uv sync --extra pyqrack-cpu --dev
       - name: Run tests
         # For example, using `pytest`
         run: uv run just coverage
