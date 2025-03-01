@@ -78,4 +78,7 @@ class PyQrackMethods(interp.MethodTable):
     ):
         lhs: CRegister = frame.get(stmt.lhs)
         rhs: CRegister = frame.get(stmt.rhs)
+        if len(lhs) != len(rhs):
+            return (False,)
+
         return (all(left is right for left, right in zip(lhs, rhs)),)
