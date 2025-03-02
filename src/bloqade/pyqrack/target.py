@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, TypeVar, ParamSpec
+from typing import List, TypeVar, ParamSpec, TypedDict
 from dataclasses import field, dataclass
 
 from kirin import ir
@@ -7,15 +7,28 @@ from kirin.passes import Fold
 from bloqade.pyqrack.base import StackMemory, DynamicMemory, PyQrackInterpreter
 from bloqade.analysis.address import AnyAddress, AddressAnalysis
 
-Params = ParamSpec("Params")
-RetType = TypeVar("RetType")
+
+class PyQrackOptions(TypedDict):
+    isTensorNetwork: bool
+    isSchmidtDecomposeMulti: bool
+    isSchmidtDecompose: bool
+    isStabilizerHybrid: bool
+    isBinaryDecisionTree: bool
+    isPaged: bool
+    isCpuGpuHybrid: bool
+    isOpenCL: bool
+    isHostPointer: bool
 
 
-def _default_pyqrack_args():
+def _default_pyqrack_args() -> PyQrackOptions:
     return {
         "isTensorNetwork": False,
         "isOpenCL": False,
     }
+
+
+Params = ParamSpec("Params")
+RetType = TypeVar("RetType")
 
 
 @dataclass
@@ -27,9 +40,9 @@ class PyQrack:
     Useful when address analysis fails to determine the number of qubits.
     """
     dynamic_qubits: bool = False
-    """Whether to use dynamic qubit allocation."""
+    """Whether to use dynamic qubit allocation. Cannot use with tensor network simulations."""
 
-    pyqrack_options: Dict[str, Any] = field(default_factory=_default_pyqrack_args)
+    pyqrack_options: PyQrackOptions = field(default_factory=_default_pyqrack_args)
     """Options to pass to the QrackSimulator object, node `qubitCount` will be overwritten."""
 
     def _get_interp(self, mt: ir.Method[Params, RetType]):
@@ -99,8 +112,10 @@ class PyQrack:
             List of results of the kernel method, one for each shot.
 
         """
-        interpreter = self._get_interp(mt)
+        fold = Fold(mt.dialects)
+        fold(mt)
 
+        interpreter = self._get_interp(mt)
         batched_results = []
         for _ in range(_shots):
             batched_results.append(interpreter.run(mt, args, kwargs).expect())
