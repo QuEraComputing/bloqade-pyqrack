@@ -4,6 +4,7 @@ from dataclasses import field, dataclass
 import numpy as np
 from kirin.interp import Interpreter
 from typing_extensions import Self
+from kirin.interp.exceptions import InterpreterError
 
 if typing.TYPE_CHECKING:
     from pyqrack import QrackSimulator
@@ -14,6 +15,19 @@ class Memory:
     total: int
     allocated: int
     sim_reg: "QrackSimulator"
+
+    def allocate(self, n_qubits: int):
+        curr_allocated = self.allocated
+        self.allocated += n_qubits
+
+        if self.allocated > self.total:
+            raise InterpreterError(
+                f"qubit allocation exceeds memory, "
+                f"{self.total} qubits, "
+                f"{self.allocated} allocated"
+            )
+
+        return tuple(range(curr_allocated, self.allocated))
 
 
 @dataclass

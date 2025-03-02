@@ -12,21 +12,11 @@ class PyQrackMethods(interp.MethodTable):
         self, interp: PyQrackInterpreter, frame: interp.Frame, stmt: core.QRegNew
     ):
         n_qubits: int = frame.get(stmt.n_qubits)
-        curr_allocated = interp.memory.allocated
-        interp.memory.allocated += n_qubits
-
-        if interp.memory.allocated > interp.memory.total:
-            raise ValueError(
-                f"qubit allocation exceeds memory, "
-                f"{interp.memory.total} qubits, "
-                f"{interp.memory.allocated} allocated"
-            )
-
         return (
             PyQrackReg(
                 size=n_qubits,
                 sim_reg=interp.memory.sim_reg,
-                addrs=tuple(range(curr_allocated, curr_allocated + n_qubits)),
+                addrs=interp.memory.allocate(n_qubits),
                 qubit_state=[QubitState.Active] * n_qubits,
             ),
         )
@@ -48,9 +38,7 @@ class PyQrackMethods(interp.MethodTable):
     def creg_get(
         self, interp: PyQrackInterpreter, frame: interp.Frame, stmt: core.CRegGet
     ):
-        creg: CRegister = frame.get(stmt.reg)
-        pos: int = frame.get(stmt.idx)
-        return (CBitRef(creg, pos),)
+        return (CBitRef(ref=frame.get(stmt.reg), pos=frame.get(stmt.idx)),)
 
     @interp.impl(core.Measure)
     def measure(
