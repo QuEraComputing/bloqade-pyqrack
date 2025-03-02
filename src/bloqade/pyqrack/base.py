@@ -53,7 +53,7 @@ class DynamicMemory(MemoryABC):
     sim_reg: "QrackSimulator"
 
     def __post_init__(self):
-        if self.sim_reg.is_tensor_network():
+        if self.sim_reg.is_tensor_network:
             raise ValueError("DynamicMemory does not support tensor networks")
 
         self.reset()
