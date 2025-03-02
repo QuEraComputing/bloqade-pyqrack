@@ -6,7 +6,11 @@ from .reg import (
     Measurement as Measurement,
     PyQrackQubit as PyQrackQubit,
 )
-from .base import Memory as Memory, PyQrackInterpreter as PyQrackInterpreter
+from .base import (
+    StackMemory as StackMemory,
+    DynamicMemory as DynamicMemory,
+    PyQrackInterpreter as PyQrackInterpreter,
+)
 from .noise import native as native
 
 # NOTE: The following import is for registering the method tables

@@ -2,7 +2,7 @@ from unittest.mock import Mock
 
 from bloqade import qasm2
 from bloqade.noise import native
-from bloqade.pyqrack import Memory, PyQrackInterpreter, reg
+from bloqade.pyqrack import StackMemory, PyQrackInterpreter, reg
 
 simulation = qasm2.extended.add(native)
 
@@ -21,7 +21,7 @@ def test_atom_loss():
     rng_state = Mock()
     rng_state.uniform.return_value = 0.7
     input = reg.CRegister(1)
-    memory = Memory(total=2, allocated=0, sim_reg=Mock())
+    memory = StackMemory(total=2, allocated=0, sim_reg=Mock())
 
     result: reg.PyQrackReg[Mock] = (
         PyQrackInterpreter(simulation, memory=memory, rng_state=rng_state)
