@@ -3,9 +3,9 @@ from dataclasses import field, dataclass
 
 import numpy as np
 from kirin.interp import Interpreter
-from kirin.interp.exceptions import InterpreterError
 from typing_extensions import Self
 from bloqade.pyqrack.reg import Measurement
+from kirin.interp.exceptions import InterpreterError
 
 if typing.TYPE_CHECKING:
     from pyqrack import QrackSimulator
