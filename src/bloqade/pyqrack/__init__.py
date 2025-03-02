@@ -3,6 +3,7 @@ from .reg import (
     CRegister as CRegister,
     PyQrackReg as PyQrackReg,
     QubitState as QubitState,
+    Measurement as Measurement,
     PyQrackQubit as PyQrackQubit,
 )
 from .base import Memory as Memory, PyQrackInterpreter as PyQrackInterpreter

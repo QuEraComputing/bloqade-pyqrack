@@ -1,5 +1,12 @@
 from kirin import interp
-from bloqade.pyqrack.reg import CBitRef, CRegister, PyQrackReg, QubitState, PyQrackQubit
+from bloqade.pyqrack.reg import (
+    CBitRef,
+    CRegister,
+    PyQrackReg,
+    QubitState,
+    Measurement,
+    PyQrackQubit,
+)
 from bloqade.pyqrack.base import PyQrackInterpreter
 from bloqade.qasm2.dialects import core
 
@@ -46,7 +53,10 @@ class PyQrackMethods(interp.MethodTable):
     ):
         qarg: PyQrackQubit = frame.get(stmt.qarg)
         carg: CBitRef = frame.get(stmt.carg)
-        carg.set_value(bool(qarg.ref.sim_reg.m(qarg.addr)))
+        if qarg.is_active():
+            carg.set_value(Measurement(qarg.ref.sim_reg.m(qarg.addr)))
+        else:
+            carg.set_value(interp.loss_m_result)
 
         return ()
 
@@ -56,4 +66,7 @@ class PyQrackMethods(interp.MethodTable):
     ):
         lhs: CRegister = frame.get(stmt.lhs)
         rhs: CRegister = frame.get(stmt.rhs)
+        if len(lhs) != len(rhs):
+            return (False,)
+
         return (all(left is right for left, right in zip(lhs, rhs)),)
