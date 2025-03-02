@@ -21,7 +21,7 @@ def test():
         return c
 
     target = PyQrack(
-        pyqrack_options={"isBinaryDecisionTree": True, "isTensorNetwork": False},
+        pyqrack_options={"isTensorNetwork": False, "isStabilizerHybrid": True},
         dynamic_qubits=True,
     )
 
