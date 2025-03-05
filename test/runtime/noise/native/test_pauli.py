@@ -3,13 +3,13 @@ from unittest.mock import Mock, call
 from kirin import ir
 from bloqade import qasm2
 from bloqade.noise import native
-from bloqade.pyqrack import Memory, PyQrackInterpreter
+from bloqade.pyqrack import StackMemory, PyQrackInterpreter
 
 simulation = qasm2.extended.add(native)
 
 
 def run_mock(size, program: ir.Method, rng_state: Mock) -> Mock:
-    memory = Memory(total=2, allocated=0, sim_reg=Mock())
+    memory = StackMemory(total=2, allocated=0, sim_reg=Mock())
 
     PyQrackInterpreter(program.dialects, memory=memory, rng_state=rng_state).run(
         program, ()

@@ -7,7 +7,7 @@ from bloqade import qasm2, pyqrack
 
 
 def run_mock(size: int, program: ir.Method) -> Mock:
-    memory = pyqrack.Memory(size, 0, Mock())
+    memory = pyqrack.StackMemory(size, 0, Mock())
     interp = pyqrack.PyQrackInterpreter(qasm2.main, memory=memory)
     interp.run(program, ())
 

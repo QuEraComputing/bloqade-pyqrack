@@ -54,10 +54,16 @@ class PyQrackMethods(interp.MethodTable):
         qarg: PyQrackQubit = frame.get(stmt.qarg)
         carg: CBitRef = frame.get(stmt.carg)
         if qarg.is_active():
-            carg.set_value(Measurement(qarg.ref.sim_reg.m(qarg.addr)))
+            carg.set_value(Measurement(qarg.sim_reg.m(qarg.addr)))
         else:
             carg.set_value(interp.loss_m_result)
 
+        return ()
+
+    @interp.impl(core.Reset)
+    def reset(self, interp: PyQrackInterpreter, frame: interp.Frame, stmt: core.Reset):
+        qarg: PyQrackQubit = frame.get(stmt.qarg)
+        qarg.sim_reg.force_m(qarg.addr, 0)
         return ()
 
     @interp.impl(core.CRegEq)

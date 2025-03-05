@@ -1,21 +1,34 @@
-from typing import Any, Dict, List, TypeVar, ParamSpec
+from typing import List, TypeVar, ParamSpec, TypedDict
 from dataclasses import field, dataclass
 
 from kirin import ir
 from pyqrack import QrackSimulator
 from kirin.passes import Fold
-from bloqade.pyqrack.base import Memory, PyQrackInterpreter
+from bloqade.pyqrack.base import StackMemory, DynamicMemory, PyQrackInterpreter
 from bloqade.analysis.address import AnyAddress, AddressAnalysis
 
-Params = ParamSpec("Params")
-RetType = TypeVar("RetType")
+
+class PyQrackOptions(TypedDict):
+    isTensorNetwork: bool
+    isSchmidtDecomposeMulti: bool
+    isSchmidtDecompose: bool
+    isStabilizerHybrid: bool
+    isBinaryDecisionTree: bool
+    isPaged: bool
+    isCpuGpuHybrid: bool
+    isOpenCL: bool
+    isHostPointer: bool
 
 
-def _default_pyqrack_args():
+def _default_pyqrack_args() -> PyQrackOptions:
     return {
         "isTensorNetwork": False,
         "isOpenCL": False,
     }
+
+
+Params = ParamSpec("Params")
+RetType = TypeVar("RetType")
 
 
 @dataclass
@@ -26,10 +39,39 @@ class PyQrack:
     """Minimum number of qubits required for the PyQrack simulator.
     Useful when address analysis fails to determine the number of qubits.
     """
-    pyqrack_options: Dict[str, Any] = field(default_factory=_default_pyqrack_args)
+    dynamic_qubits: bool = False
+    """Whether to use dynamic qubit allocation. Cannot use with tensor network simulations."""
+
+    pyqrack_options: PyQrackOptions = field(default_factory=_default_pyqrack_args)
     """Options to pass to the QrackSimulator object, node `qubitCount` will be overwritten."""
 
-    memory: Memory | None = field(init=False, default=None)
+    def _get_interp(self, mt: ir.Method[Params, RetType]):
+        if self.dynamic_qubits:
+            return PyQrackInterpreter(
+                mt.dialects,
+                memory=DynamicMemory(
+                    QrackSimulator(qubitCount=0, **self.pyqrack_options)
+                ),
+            )
+        else:
+            address_analysis = AddressAnalysis(mt.dialects)
+            frame, _ = address_analysis.run_analysis(mt)
+            if self.min_qubits == 0 and any(
+                isinstance(a, AnyAddress) for a in frame.entries.values()
+            ):
+                raise ValueError(
+                    "All addresses must be resolved. Or set min_qubits to a positive integer."
+                )
+
+            num_qubits = max(address_analysis.qubit_count, self.min_qubits)
+            self.pyqrack_options.pop("qubitCount", None)
+            memory = StackMemory(
+                num_qubits,
+                allocated=0,
+                sim_reg=QrackSimulator(qubitCount=num_qubits, **self.pyqrack_options),
+            )
+
+            return PyQrackInterpreter(mt.dialects, memory=memory)
 
     def run(
         self,
@@ -49,24 +91,7 @@ class PyQrack:
         """
         fold = Fold(mt.dialects)
         fold(mt)
-        address_analysis = AddressAnalysis(mt.dialects)
-        frame, ret = address_analysis.run_analysis(mt)
-        if self.min_qubits == 0 and any(
-            isinstance(a, AnyAddress) for a in frame.entries.values()
-        ):
-            raise ValueError(
-                "All addresses must be resolved. Or set min_qubits to a positive integer."
-            )
-
-        num_qubits = max(address_analysis.qubit_count, self.min_qubits)
-        self.pyqrack_options.pop("qubitCount", None)
-        self.memory = Memory(
-            num_qubits,
-            allocated=0,
-            sim_reg=QrackSimulator(qubitCount=num_qubits, **self.pyqrack_options),
-        )
-        interpreter = PyQrackInterpreter(mt.dialects, memory=self.memory)
-        return interpreter.run(mt, args, kwargs).expect()
+        return self._get_interp(mt).run(mt, args, kwargs).expect()
 
     def multi_run(
         self,
@@ -87,26 +112,12 @@ class PyQrack:
             List of results of the kernel method, one for each shot.
 
         """
+        fold = Fold(mt.dialects)
+        fold(mt)
 
-        address_analysis = AddressAnalysis(mt.dialects)
-        frame, ret = address_analysis.run_analysis(mt)
-        if any(isinstance(a, AnyAddress) for a in frame.entries.values()):
-            raise ValueError("All addresses must be resolved.")
-
-        memory = Memory(
-            address_analysis.next_address,
-            allocated=0,
-            sim_reg=QrackSimulator(
-                qubitCount=address_analysis.next_address,
-                **self.pyqrack_options,
-            ),
-        )
-
+        interpreter = self._get_interp(mt)
         batched_results = []
         for _ in range(_shots):
-            memory.allocated = 0
-            memory.sim_reg.reset_all()
-            interpreter = PyQrackInterpreter(mt.dialects, memory=memory)
             batched_results.append(interpreter.run(mt, args, kwargs).expect())
 
         return batched_results
