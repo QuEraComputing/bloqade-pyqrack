@@ -66,7 +66,7 @@ class PyQrack:
             num_qubits = max(address_analysis.qubit_count, self.min_qubits)
             self.pyqrack_options.pop("qubitCount", None)
             memory = StackMemory(
-                num_qubits,
+                total=num_qubits,
                 allocated=0,
                 sim_reg=QrackSimulator(qubitCount=num_qubits, **self.pyqrack_options),
             )

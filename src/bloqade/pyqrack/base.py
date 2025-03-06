@@ -12,7 +12,10 @@ if typing.TYPE_CHECKING:
     from pyqrack import QrackSimulator
 
 
+@dataclass
 class MemoryABC(abc.ABC):
+    sim_reg: "QrackSimulator"
+
     @abc.abstractmethod
     def allocate(self, n_qubits: int) -> tuple[int, ...]:
         """Allocate `n_qubits` qubits and return their ids."""
@@ -28,7 +31,6 @@ class MemoryABC(abc.ABC):
 class StackMemory(MemoryABC):
     total: int
     allocated: int
-    sim_reg: "QrackSimulator"
 
     def allocate(self, n_qubits: int):
         curr_allocated = self.allocated
@@ -50,7 +52,6 @@ class StackMemory(MemoryABC):
 
 @dataclass
 class DynamicMemory(MemoryABC):
-    sim_reg: "QrackSimulator"
 
     def __post_init__(self):
         if self.sim_reg.is_tensor_network:

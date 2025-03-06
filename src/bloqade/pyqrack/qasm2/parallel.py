@@ -17,7 +17,7 @@ class PyQrackMethods(interp.MethodTable):
         ctrls: ilist.IList[PyQrackQubit, Any] = frame.get(stmt.ctrls)
         for qarg, ctrl in zip(qargs, ctrls):
             if qarg.is_active() and ctrl.is_active():
-                interp.memory.sim_reg.mcz(qarg, ctrl)
+                interp.memory.sim_reg.mcz([ctrl.addr], qarg.addr)
         return ()
 
     @interp.impl(parallel.UGate)
@@ -32,7 +32,7 @@ class PyQrackMethods(interp.MethodTable):
         )
         for qarg in qargs:
             if qarg.is_active():
-                interp.memory.sim_reg.u(qarg, theta, phi, lam)
+                interp.memory.sim_reg.u(qarg.addr, theta, phi, lam)
         return ()
 
     @interp.impl(parallel.RZ)
@@ -41,5 +41,5 @@ class PyQrackMethods(interp.MethodTable):
         phi = frame.get(stmt.theta)
         for qarg in qargs:
             if qarg.is_active():
-                interp.memory.sim_reg.r(3, phi, qarg)
+                interp.memory.sim_reg.r(3, phi, qarg.addr)
         return ()
