@@ -14,7 +14,7 @@ if typing.TYPE_CHECKING:
 
 @dataclass
 class MemoryABC(abc.ABC):
-    sim_reg: "QrackSimulator"
+    sim_reg: "QrackSimulator" = field(kw_only=True)
 
     @abc.abstractmethod
     def allocate(self, n_qubits: int) -> tuple[int, ...]:
