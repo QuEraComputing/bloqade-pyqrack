@@ -25,6 +25,18 @@ This package has three different optional dependencies to decide which one, or m
 uv add bloqade-pyqrack[...]
 ```
 
+### Which extra do I install??
+
+Because how the pyqrack packages have been deployed you have to install one of the optional dependencies to get it to work on your platform depending on the status of how your platform interacts with OpenCL:
+
+* if your on a platform that supports OpenCL but you do not have it installed you have to install `bloqade-pyqrack[pyqrack-cpu]`
+* If your platform doesn't support OpenCL and you want to run it on a cpu backend you must install `bloqade-pyqrack[pyqrack]`.
+* If you're system has OpenCL compatible QPU with OpenCL installed you can use your GPU via `bloqade-pyqrack[pyqrack]`
+* If you have an Nvidia GPU you can install `bloqade-pyqrack[pyqrack-cuda]`.
+
+In the future this will be simplified so that `pyqrack-cpu` will mean `cpu` only and `pyqrack` will be `cpu` and `gpu` via OpenCL and `pyqrack-cuda` will be `gpu` via CUDA.
+
+
 ## License
 
 Apache License 2.0 with LLVM Exceptions
