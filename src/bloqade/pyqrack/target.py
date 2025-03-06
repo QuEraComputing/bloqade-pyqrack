@@ -50,7 +50,7 @@ class PyQrack:
             return PyQrackInterpreter(
                 mt.dialects,
                 memory=DynamicMemory(
-                    QrackSimulator(qubitCount=0, **self.pyqrack_options)
+                    sim_reg=QrackSimulator(qubitCount=0, **self.pyqrack_options)
                 ),
             )
         else:
@@ -64,11 +64,11 @@ class PyQrack:
                 )
 
             num_qubits = max(address_analysis.qubit_count, self.min_qubits)
-            self.pyqrack_options.pop("qubitCount", None)
+            options = {**self.pyqrack_options, "qubitCount": num_qubits}
             memory = StackMemory(
-                num_qubits,
+                total=num_qubits,
                 allocated=0,
-                sim_reg=QrackSimulator(qubitCount=num_qubits, **self.pyqrack_options),
+                sim_reg=QrackSimulator(**options),
             )
 
             return PyQrackInterpreter(mt.dialects, memory=memory)

@@ -7,8 +7,8 @@ from bloqade import qasm2, pyqrack
 
 
 def run_mock(size: int, program: ir.Method) -> Mock:
-    memory = pyqrack.StackMemory(size, 0, Mock())
-    interp = pyqrack.PyQrackInterpreter(qasm2.main, memory=memory)
+    memory = pyqrack.StackMemory(size, 0, sim_reg=Mock())
+    interp = pyqrack.PyQrackInterpreter(program.dialects, memory=memory)
     interp.run(program, ())
 
     return memory.sim_reg
@@ -137,5 +137,27 @@ def test_special_control():
             call.u(0, 0.0, 0.0, 0.8),
             call.mcu([0], 1, 0.5, 0.2, 0.1),
             call.cswap([0], 1, 2),
+        ]
+    )
+
+
+def test_extended():
+    @qasm2.extended
+    def program():
+        q = qasm2.qreg(4)
+
+        qasm2.parallel.cz(ctrls=[q[0], q[2]], qargs=[q[1], q[3]])
+        qasm2.parallel.u([q[0], q[1]], theta=0.5, phi=0.2, lam=0.1)
+        qasm2.parallel.rz([q[0], q[1]], 0.5)
+
+    sim_reg = run_mock(4, program)
+    sim_reg.assert_has_calls(
+        [
+            call.mcz([0], 1),
+            call.mcz([2], 3),
+            call.u(0, 0.5, 0.2, 0.1),
+            call.u(1, 0.5, 0.2, 0.1),
+            call.r(3, 0.5, 0),
+            call.r(3, 0.5, 1),
         ]
     )
