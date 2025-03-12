@@ -17,13 +17,13 @@ dependencies = [
 
 [project.optional-dependencies]
 pyqrack = [
-    "pyqrack<=1.35.7",
+    "pyqrack<=1.35.8",
 ]
 pyqrack-cpu = [
-    "pyqrack-cpu<=1.35.7",
+    "pyqrack-cpu<=1.35.8",
 ]
 pyqrack-cuda = [
-    "pyqrack-cuda<=1.35.7",
+    "pyqrack-cuda<=1.35.8",
 ]
 
 [build-system]
