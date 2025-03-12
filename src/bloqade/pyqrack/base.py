@@ -1,4 +1,3 @@
-import os
 import abc
 import typing
 from dataclasses import field, dataclass
@@ -22,23 +21,19 @@ class PyQrackOptions(typing.TypedDict):
     isPaged: bool
     isCpuGpuHybrid: bool
     isOpenCL: bool
-    isHostPointer: bool
 
 
 def _default_pyqrack_args() -> PyQrackOptions:
     return PyQrackOptions(
-        qubitCount=0,
+        qubitCount=-1,
         isTensorNetwork=False,
         isSchmidtDecomposeMulti=True,
         isSchmidtDecompose=True,
-        isStabilizerHybrid=False,
+        isStabilizerHybrid=True,
         isBinaryDecisionTree=True,
         isPaged=True,
         isCpuGpuHybrid=True,
         isOpenCL=True,
-        isHostPointer=(
-            True if os.environ.get("PYQRACK_HOST_POINTER_DEFAULT_ON") else False
-        ),
     )
 
 

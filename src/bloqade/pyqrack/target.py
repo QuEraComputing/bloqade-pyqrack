@@ -39,7 +39,7 @@ class PyQrack:
         if self.dynamic_qubits:
 
             options = self.pyqrack_options.copy()
-            options["qubitCount"] = 0
+            options["qubitCount"] = -1
             return PyQrackInterpreter(mt.dialects, memory=DynamicMemory(options))
         else:
             address_analysis = AddressAnalysis(mt.dialects)
