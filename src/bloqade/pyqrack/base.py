@@ -1,6 +1,7 @@
 import abc
 import typing
 from dataclasses import field, dataclass
+from unittest.mock import Mock
 
 import numpy as np
 from pyqrack import QrackSimulator
@@ -40,7 +41,7 @@ def _default_pyqrack_args() -> PyQrackOptions:
 
 @dataclass
 class MemoryABC(abc.ABC):
-    pyqrack_options: PyQrackOptions
+    pyqrack_options: PyQrackOptions = field(default_factory=_default_pyqrack_args)
     sim_reg: "QrackSimulator" = field(init=False)
 
     @abc.abstractmethod
@@ -56,9 +57,26 @@ class MemoryABC(abc.ABC):
 
 
 @dataclass
+class MockMemory(MemoryABC):
+    """Mock memory for testing purposes."""
+
+    allocated: int = field(init=False, default=0)
+
+    def allocate(self, n_qubits: int):
+        allocated = self.allocated + n_qubits
+        result = tuple(range(self.allocated, allocated))
+        self.allocated = allocated
+        return result
+
+    def reset(self):
+        self.allocated = 0
+        self.sim_reg = Mock()
+
+
+@dataclass
 class StackMemory(MemoryABC):
-    total: int
-    allocated: int
+    total: int = field(kw_only=True)
+    allocated: int = field(init=False, default=0)
 
     def allocate(self, n_qubits: int):
         curr_allocated = self.allocated

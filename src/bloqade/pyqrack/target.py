@@ -51,7 +51,6 @@ class PyQrack:
             memory = StackMemory(
                 options,
                 total=num_qubits,
-                allocated=0,
             )
 
             return PyQrackInterpreter(mt.dialects, memory=memory)
