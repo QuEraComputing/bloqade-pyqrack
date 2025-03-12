@@ -7,7 +7,6 @@ from bloqade.pyqrack.base import MockMemory, PyQrackInterpreter
 
 
 def run_mock(program: ir.Method, rng_state: Mock | None = None):
-    rng_state = rng_state or Mock()
     PyQrackInterpreter(
         program.dialects, memory=(memory := MockMemory()), rng_state=rng_state
     ).run(program, ()).expect()
