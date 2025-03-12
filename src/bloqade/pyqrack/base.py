@@ -3,28 +3,56 @@ import typing
 from dataclasses import field, dataclass
 
 import numpy as np
+from pyqrack import QrackSimulator
 from kirin.interp import Interpreter
 from typing_extensions import Self
 from bloqade.pyqrack.reg import Measurement
 from kirin.interp.exceptions import InterpreterError
 
-if typing.TYPE_CHECKING:
-    from pyqrack import QrackSimulator
+
+class PyQrackOptions(typing.TypedDict):
+    qubitCount: int
+    isTensorNetwork: bool
+    isSchmidtDecomposeMulti: bool
+    isSchmidtDecompose: bool
+    isStabilizerHybrid: bool
+    isBinaryDecisionTree: bool
+    isPaged: bool
+    isCpuGpuHybrid: bool
+    isOpenCL: bool
+    isHostPointer: bool
+
+
+def _default_pyqrack_args() -> PyQrackOptions:
+    return PyQrackOptions(
+        qubitCount=0,
+        isTensorNetwork=False,
+        isSchmidtDecomposeMulti=False,
+        isSchmidtDecompose=False,
+        isStabilizerHybrid=False,
+        isBinaryDecisionTree=True,
+        isPaged=False,
+        isCpuGpuHybrid=False,
+        isOpenCL=False,
+        isHostPointer=False,
+    )
 
 
 @dataclass
 class MemoryABC(abc.ABC):
-    sim_reg: "QrackSimulator" = field(kw_only=True)
+    pyqrack_options: PyQrackOptions
+    sim_reg: "QrackSimulator" = field(init=False)
 
     @abc.abstractmethod
     def allocate(self, n_qubits: int) -> tuple[int, ...]:
         """Allocate `n_qubits` qubits and return their ids."""
         ...
 
-    @abc.abstractmethod
     def reset(self):
         """Reset the memory, releasing all qubits."""
-        ...
+        # do not reset the simulator it might be used by
+        # results of the simulation
+        self.sim_reg = QrackSimulator(**self.pyqrack_options)
 
 
 @dataclass
@@ -46,18 +74,17 @@ class StackMemory(MemoryABC):
         return tuple(range(curr_allocated, self.allocated))
 
     def reset(self):
-        self.sim_reg.reset_all()
+        super().reset()
         self.allocated = 0
 
 
 @dataclass
 class DynamicMemory(MemoryABC):
-
     def __post_init__(self):
+        self.reset()
+
         if self.sim_reg.is_tensor_network:
             raise ValueError("DynamicMemory does not support tensor networks")
-
-        self.reset()
 
     def allocate(self, n_qubits: int):
         start = self.sim_reg.num_qubits()
@@ -65,10 +92,6 @@ class DynamicMemory(MemoryABC):
             self.sim_reg.allocate_qubit(i)
 
         return tuple(range(start, start + n_qubits))
-
-    def reset(self):
-        for qid in self.sim_reg.dump_ids():
-            self.sim_reg.release(qid)
 
 
 @dataclass

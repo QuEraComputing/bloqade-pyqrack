@@ -1,31 +1,16 @@
-from typing import List, TypeVar, ParamSpec, TypedDict
+from typing import List, TypeVar, ParamSpec
 from dataclasses import field, dataclass
 
 from kirin import ir
-from pyqrack import QrackSimulator
 from kirin.passes import Fold
-from bloqade.pyqrack.base import StackMemory, DynamicMemory, PyQrackInterpreter
+from bloqade.pyqrack.base import (
+    StackMemory,
+    DynamicMemory,
+    PyQrackOptions,
+    PyQrackInterpreter,
+    _default_pyqrack_args,
+)
 from bloqade.analysis.address import AnyAddress, AddressAnalysis
-
-
-class PyQrackOptions(TypedDict):
-    isTensorNetwork: bool
-    isSchmidtDecomposeMulti: bool
-    isSchmidtDecompose: bool
-    isStabilizerHybrid: bool
-    isBinaryDecisionTree: bool
-    isPaged: bool
-    isCpuGpuHybrid: bool
-    isOpenCL: bool
-    isHostPointer: bool
-
-
-def _default_pyqrack_args() -> PyQrackOptions:
-    return {
-        "isTensorNetwork": False,
-        "isOpenCL": False,
-    }
-
 
 Params = ParamSpec("Params")
 RetType = TypeVar("RetType")
@@ -47,12 +32,9 @@ class PyQrack:
 
     def _get_interp(self, mt: ir.Method[Params, RetType]):
         if self.dynamic_qubits:
-            return PyQrackInterpreter(
-                mt.dialects,
-                memory=DynamicMemory(
-                    sim_reg=QrackSimulator(qubitCount=0, **self.pyqrack_options)
-                ),
-            )
+            options = self.pyqrack_options.copy()
+            options["qubitCount"] = 0
+            return PyQrackInterpreter(mt.dialects, memory=DynamicMemory(options))
         else:
             address_analysis = AddressAnalysis(mt.dialects)
             frame, _ = address_analysis.run_analysis(mt)
@@ -64,11 +46,12 @@ class PyQrack:
                 )
 
             num_qubits = max(address_analysis.qubit_count, self.min_qubits)
-            options = {**self.pyqrack_options, "qubitCount": num_qubits}
+            options = self.pyqrack_options.copy()
+            options["qubitCount"] = num_qubits
             memory = StackMemory(
+                options,
                 total=num_qubits,
                 allocated=0,
-                sim_reg=QrackSimulator(**options),
             )
 
             return PyQrackInterpreter(mt.dialects, memory=memory)
