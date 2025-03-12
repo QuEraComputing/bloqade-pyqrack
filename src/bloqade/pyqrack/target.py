@@ -30,8 +30,14 @@ class PyQrack:
     pyqrack_options: PyQrackOptions = field(default_factory=_default_pyqrack_args)
     """Options to pass to the QrackSimulator object, node `qubitCount` will be overwritten."""
 
+    def __post_init__(self):
+        self.pyqrack_options = PyQrackOptions(
+            {**_default_pyqrack_args(), **self.pyqrack_options}
+        )
+
     def _get_interp(self, mt: ir.Method[Params, RetType]):
         if self.dynamic_qubits:
+
             options = self.pyqrack_options.copy()
             options["qubitCount"] = 0
             return PyQrackInterpreter(mt.dialects, memory=DynamicMemory(options))
