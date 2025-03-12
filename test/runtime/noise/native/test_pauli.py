@@ -3,19 +3,17 @@ from unittest.mock import Mock, call
 from kirin import ir
 from bloqade import qasm2
 from bloqade.noise import native
-from bloqade.pyqrack import StackMemory, PyQrackInterpreter
+from bloqade.pyqrack.base import MockMemory, PyQrackInterpreter
 
 simulation = qasm2.extended.add(native)
 
 
-def run_mock(size, program: ir.Method, rng_state: Mock) -> Mock:
-    memory = StackMemory(total=2, allocated=0, sim_reg=Mock())
-
-    PyQrackInterpreter(program.dialects, memory=memory, rng_state=rng_state).run(
-        program, ()
-    ).expect()
-
-    return memory.sim_reg
+def run_mock(program: ir.Method, rng_state: Mock | None = None):
+    PyQrackInterpreter(
+        program.dialects, memory=(memory := MockMemory()), rng_state=rng_state
+    ).run(program, ()).expect()
+    assert isinstance(mock := memory.sim_reg, Mock)
+    return mock
 
 
 def test_pauli_channel():
@@ -38,7 +36,7 @@ def test_pauli_channel():
 
     rng_state = Mock()
     rng_state.choice.side_effect = ["y", "i"]
-    sim_reg = run_mock(2, test_atom_loss, rng_state)
+    sim_reg = run_mock(test_atom_loss, rng_state)
     sim_reg.assert_has_calls([call.y(0)])
 
 
@@ -82,7 +80,7 @@ def test_cz_pauli_channel_false():
     rng_state = Mock()
     rng_state.choice.side_effect = ["y"]
     rng_state.uniform.return_value = 0.5
-    sim_reg = run_mock(2, test_atom_loss, rng_state)
+    sim_reg = run_mock(test_atom_loss, rng_state)
     sim_reg.assert_has_calls([call.mcz([0], 1), call.force_m(0, 0), call.y(1)])
 
 
@@ -123,7 +121,7 @@ def test_cz_pauli_channel_true():
     rng_state = Mock()
     rng_state.choice.side_effect = ["y", "x"]
     rng_state.uniform.return_value = 0.5
-    sim_reg = run_mock(2, test_atom_loss, rng_state)
+    sim_reg = run_mock(test_atom_loss, rng_state)
 
     sim_reg.assert_has_calls([call.y(0), call.x(1), call.mcz([0], 1)])
 

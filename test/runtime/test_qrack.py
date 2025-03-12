@@ -2,16 +2,16 @@ import math
 from unittest.mock import Mock, call
 
 from kirin import ir
-from pytest import mark
-from bloqade import qasm2, pyqrack
+from bloqade import qasm2
+from bloqade.pyqrack.base import MockMemory, PyQrackInterpreter
 
 
-def run_mock(size: int, program: ir.Method) -> Mock:
-    memory = pyqrack.StackMemory(size, 0, sim_reg=Mock())
-    interp = pyqrack.PyQrackInterpreter(program.dialects, memory=memory)
-    interp.run(program, ())
-
-    return memory.sim_reg
+def run_mock(program: ir.Method, rng_state: Mock | None = None):
+    PyQrackInterpreter(
+        program.dialects, memory=(memory := MockMemory()), rng_state=rng_state
+    ).run(program, ()).expect()
+    assert isinstance(mock := memory.sim_reg, Mock)
+    return mock
 
 
 def test_basic_gates():
@@ -32,7 +32,7 @@ def test_basic_gates():
         qasm2.sx(q[2])
         qasm2.sxdg(q[0])
 
-    sim_reg = run_mock(3, program)
+    sim_reg = run_mock(program)
     sim_reg.assert_has_calls(
         [
             call.h(0),
@@ -58,7 +58,7 @@ def test_rotation_gates():
         qasm2.ry(q[1], 0.5)
         qasm2.rz(q[2], 0.5)
 
-    sim_reg = run_mock(3, program)
+    sim_reg = run_mock(program)
 
     sim_reg.assert_has_calls(
         [
@@ -78,7 +78,7 @@ def test_u_gates():
         qasm2.u2(q[1], 0.2, 0.1)
         qasm2.u1(q[2], 0.2)
 
-    sim_reg = run_mock(3, program)
+    sim_reg = run_mock(program)
     sim_reg.assert_has_calls(
         [
             call.u(0, 0.5, 0.2, 0.1),
@@ -88,7 +88,6 @@ def test_u_gates():
     )
 
 
-@mark.xfail(reason="binding for swap not implemented")
 def test_basic_control_gates():
 
     @qasm2.main
@@ -102,7 +101,7 @@ def test_basic_control_gates():
         qasm2.csx(q[1], q[2])
         qasm2.swap(q[0], q[2])  # requires new bloqade version
 
-    sim_reg = run_mock(3, program)
+    sim_reg = run_mock(program)
     sim_reg.assert_has_calls(
         [
             call.mcx([0], 1),
@@ -127,7 +126,7 @@ def test_special_control():
         qasm2.cu(q[0], q[1], 0.5, 0.2, 0.1, 0.8)
         qasm2.cswap(q[0], q[1], q[2])
 
-    sim_reg = run_mock(3, program)
+    sim_reg = run_mock(program)
     sim_reg.assert_has_calls(
         [
             call.mcr(1, 0.5, [0], 1),
@@ -150,7 +149,7 @@ def test_extended():
         qasm2.parallel.u([q[0], q[1]], theta=0.5, phi=0.2, lam=0.1)
         qasm2.parallel.rz([q[0], q[1]], 0.5)
 
-    sim_reg = run_mock(4, program)
+    sim_reg = run_mock(program)
     sim_reg.assert_has_calls(
         [
             call.mcz([0], 1),
