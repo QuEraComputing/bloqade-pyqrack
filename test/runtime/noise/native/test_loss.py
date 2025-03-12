@@ -22,14 +22,14 @@ def test_atom_loss():
     @simulation
     def test_atom_loss(c: qasm2.CReg):
         q = qasm2.qreg(2)
-        native.atom_loss_channel([q[0]], prob=0.5)
-        native.atom_loss_channel([q[1]], prob=0.8)
+        native.atom_loss_channel([q[0]], prob=0.1)
+        native.atom_loss_channel([q[1]], prob=0.05)
         qasm2.measure(q[0], c[0])
 
         return q
 
     rng_state = Mock()
-    rng_state.uniform.return_value = 0.7
+    rng_state.uniform.return_value = 0.1
     input = reg.CRegister(1)
     memory = MockMemory()
 
