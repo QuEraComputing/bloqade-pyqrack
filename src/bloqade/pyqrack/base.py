@@ -1,3 +1,4 @@
+import os
 import abc
 import typing
 from dataclasses import field, dataclass
@@ -28,14 +29,16 @@ def _default_pyqrack_args() -> PyQrackOptions:
     return PyQrackOptions(
         qubitCount=0,
         isTensorNetwork=False,
-        isSchmidtDecomposeMulti=False,
-        isSchmidtDecompose=False,
+        isSchmidtDecomposeMulti=True,
+        isSchmidtDecompose=True,
         isStabilizerHybrid=False,
         isBinaryDecisionTree=True,
-        isPaged=False,
-        isCpuGpuHybrid=False,
-        isOpenCL=False,
-        isHostPointer=False,
+        isPaged=True,
+        isCpuGpuHybrid=True,
+        isOpenCL=True,
+        isHostPointer=(
+            True if os.environ.get("PYQRACK_HOST_POINTER_DEFAULT_ON") else False
+        ),
     )
 
 
