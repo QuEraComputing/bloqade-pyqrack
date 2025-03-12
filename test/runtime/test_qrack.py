@@ -2,7 +2,6 @@ import math
 from unittest.mock import Mock, call
 
 from kirin import ir
-from pytest import mark
 from bloqade import qasm2
 from bloqade.pyqrack.base import MockMemory, PyQrackInterpreter
 
@@ -90,7 +89,6 @@ def test_u_gates():
     )
 
 
-@mark.xfail(reason="binding for swap not implemented")
 def test_basic_control_gates():
 
     @qasm2.main
